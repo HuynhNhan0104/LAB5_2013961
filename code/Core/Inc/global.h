@@ -47,9 +47,8 @@ extern int OK_flag;
 
 
 //
-
-#define RST_CMD				 																					9
-#define OK_CMD
+#define NO_SEND_DATA																						9
+#define SEND_DATA			 																					10
 
 
 

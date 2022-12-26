@@ -394,7 +394,7 @@ void command_parser_fsm(){
 		// active communicate
 		set_timer(TIMER_UART, 3000);
 		RST_flag = 1;
-
+		HAL_UART_Transmit(&huart2, (uint8_t*)str, sprintf(str, "!ADC = %lu# \r\n", ADC_value ),50);
 		 if(temp == (uint8_t) '!' ) state_command_parser = START;
 		 else state_command_parser = NO_RECEIVE_DATA;
 
@@ -418,23 +418,43 @@ void command_parser_fsm(){
 
 }
 void uart_communiation_fsm(){
-	if(RST_flag){
-		HAL_UART_Transmit(&huart2, (uint8_t*)str, sprintf(str, "!ADC = %lu# \r\n", ADC_value ),50);
-		RST_flag = 0;
-	}
-	else{
+switch(state_uart_communication){
+	case NO_SEND_DATA:
+
+		if(RST_flag){
+			HAL_UART_Transmit(&huart2, (uint8_t*)str, sprintf(str, "!ADC = %lu# \r\n", ADC_value ),50);
+			RST_flag = 0;
+			state_uart_communication = SEND_DATA;
+		}
+
+		if(OK_flag){
+			ADC_value = HAL_ADC_GetValue(&hadc1);
+			RST_flag = 0;
+			OK_flag = 0;
+			clear_timer(TIMER_UART);
+		}
+	break;
+
+	case SEND_DATA:
 		if( is_timer_timeout(TIMER_UART) ){
 			HAL_UART_Transmit(&huart2, (uint8_t*)str, sprintf(str, "!ADC = %lu# \r\n", ADC_value ),50);
 			set_timer(TIMER_UART, 3000);
 		}
-	}
 
-	if(OK_flag){
-		ADC_value = HAL_ADC_GetValue(&hadc1);
-		RST_flag = 0;
-		OK_flag = 0;
-		clear_timer(TIMER_UART);
-	}
+		if(OK_flag){
+				ADC_value = HAL_ADC_GetValue(&hadc1);
+				RST_flag = 0;
+				OK_flag = 0;
+				clear_timer(TIMER_UART);
+				state_uart_communication = NO_SEND_DATA;
+			}
+
+	break;
+}
+
+
+
+
 
 
 }

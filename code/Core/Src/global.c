@@ -9,6 +9,8 @@
 #include "global.h"
 
 int state_command_parser = NO_RECEIVE_DATA;
+
+int state_uart_communication = NO_SEND_DATA;
 //int state_uart_communication =
 
 int RST_flag = 0;
